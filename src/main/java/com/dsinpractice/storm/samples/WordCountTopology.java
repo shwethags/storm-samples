@@ -72,6 +72,8 @@ public class WordCountTopology {
     public static final Character TOPOLOGY_NAME_SHORT_OPT = 'n';
     public static final Character CLUSTER_SHORT_OPT = 'c';
     public static final Character ENABLE_HOOK_SHORT_OPT = 'k';
+    public static final Character KAFKA_URL_SHORT_OPT = 'z';
+    public static final Character HDFS_URL_SHORT_OPT = 'h';
 
     public static class WordCount extends BaseBasicBolt {
         Map<String, Integer> counts = new HashMap<String, Integer>();
@@ -103,6 +105,7 @@ public class WordCountTopology {
         CommandLineParser parser = new DefaultParser();
         return parser.parse(options, args);
     }
+
     public static void main(String[] args) throws Exception {
 
         CommandLine commandLine = parseCommandLineArgs(args);
@@ -154,7 +157,8 @@ public class WordCountTopology {
         }
         DefaultFileNameFormat defaultFileNameFormat = new DefaultFileNameFormat().withPath(filePath);
 
-        return new HdfsBolt().withFsUrl("hdfs://localhost.localdomain:8020").
+        String hdfsUrl = commandLine.getOptionValue(HDFS_URL_SHORT_OPT, "hdfs://localhost.localdomain:8020");
+        return new HdfsBolt().withFsUrl(hdfsUrl).
                 withFileNameFormat(defaultFileNameFormat).
                 withRecordFormat(recordFormat).
                 withSyncPolicy(countSyncPolicy).
@@ -166,8 +170,10 @@ public class WordCountTopology {
         options.addOption(TOPIC_NAME_SHORT_OPT.toString(), "topic", true, "Kafka topic name");
         options.addOption(HDFS_PATH_SHORT_OPT.toString(), "path", true, "HDFS file path");
         options.addOption(TOPOLOGY_NAME_SHORT_OPT.toString(), "name", true, "Name of the topology");
-        options.addOption(CLUSTER_SHORT_OPT.toString(), "cluster", true, "Run on cluster if specified");
-        options.addOption(ENABLE_HOOK_SHORT_OPT.toString(), "hook", true, "Enable Storm Atlas Hook if specified");
+        options.addOption(CLUSTER_SHORT_OPT.toString(), "cluster", false, "Run on cluster if specified");
+        options.addOption(ENABLE_HOOK_SHORT_OPT.toString(), "hook", false, "Enable Storm Atlas Hook if specified");
+        options.addOption(KAFKA_URL_SHORT_OPT.toString(), "kafka", true, "Kafka endpoint");
+        options.addOption(HDFS_URL_SHORT_OPT.toString(), "hdfs", true, "hdfs endpoint");
         return options;
     }
 
@@ -193,7 +199,8 @@ public class WordCountTopology {
     }
 
     private static IRichSpout getKafkaSpout(CommandLine commandLine) {
-        ZkHosts zkHosts = new ZkHosts("localhost:2181");
+        String kafkaUrl = commandLine.getOptionValue(KAFKA_URL_SHORT_OPT, "localhost:2181");
+        ZkHosts zkHosts = new ZkHosts(kafkaUrl);
         String topicName = "test-topic";
         if (commandLine.hasOption(TOPIC_NAME_SHORT_OPT)) {
             topicName = commandLine.getOptionValue(TOPIC_NAME_SHORT_OPT);
