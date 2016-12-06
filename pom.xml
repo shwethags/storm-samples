@@ -56,11 +56,11 @@
           <artifactId>storm-kafka</artifactId>
           <version>1.0.1</version>
       </dependency>
-      <!--dependency>
+      <dependency>
           <groupId>org.apache.storm</groupId>
           <artifactId>storm-hive</artifactId>
-          <version>0.10.0.2.3.99.0-195</version>
-      </dependency-->
+          <version>1.0.1</version>
+      </dependency>
       <dependency>
           <groupId>org.apache.storm</groupId>
           <artifactId>storm-hdfs</artifactId>
